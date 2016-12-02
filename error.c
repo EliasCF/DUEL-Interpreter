@@ -13,7 +13,7 @@ void throw_error(const char *message)
 {
 	system("cls");
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+	SetConsoleTextAttribute(hConsole, FOREGROUND_RED); //Set foreground color as red
 
 	printf("%s\n", message);
 	printf("\nPress any key to continue...");

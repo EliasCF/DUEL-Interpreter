@@ -7,7 +7,8 @@ char *replace(char array[], char find, char replace_with);
 char *get_current_directory(const char *file);
 
 //Takes a char array/string and replaces a specified char in it with another char
-char *replace(char array[], char find, char replace_with) {
+char *replace(char array[], char find, char replace_with)
+{
 	int i = 0;
 	while(array[i] != '\0') {
 		if(array[i] == find)
@@ -22,7 +23,8 @@ char *replace(char array[], char find, char replace_with) {
 }
 
 //Returns the current working directory
-char *get_current_directory(const char *file) {
+char *get_current_directory(const char *file)
+{
 	char dir_buffer[2048];
 	char *current_directory = getcwd(dir_buffer, LENGTH(dir_buffer));
 
