@@ -24,7 +24,8 @@ void throw_error(const char *message)
 
 //Make sure there is an end statement at the end of the code
 //If not then throw an error
-void check_for_end_statement(const char *path) {
+void check_for_end_statement(const char *path)
+{
 	char *contents;
 
 	char file_buffer[1000];
@@ -41,7 +42,8 @@ void check_for_end_statement(const char *path) {
 
 //Make sure the first char in the code is an initation statement
 //If not, then throw an error
-void check_for_initation_statement(const char *path) {
+void check_for_initation_statement(const char *path)
+{
 	char *contents;
 
 	char file_buffer[1000];
@@ -61,7 +63,8 @@ void check_for_initation_statement(const char *path) {
 
 //Make sure file exists
 //If not, then throw an error
-void file_exists(FILE *file) {
+void file_exists(FILE *file)
+{
 	if(!file) {
 		perror("error");
 	}

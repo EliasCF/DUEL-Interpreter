@@ -4,7 +4,7 @@
 //To compile this interpeter in the command line with MinGW, write: g++ main.c -o main.exe
 
 //TODO:
-//Detect which line and character the an error comes from
+//Detect which line and character an error comes from
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,36 +13,33 @@
 #include "directory.c"
 
 struct Token {
-	char initiation_statement;
-	char end_statement;
-	char talk_mode;
-	char comment_mode;
+	char initiation_statement; //This token is found as the fist char, it signals the start of a program
+	char end_statement;        //This token is found as the last char, it signals the end of a program
+	char talk_mode;			   //This token tells the interpeter that the next stream of chars should be printed to the console
+	char comment_mode;		   //This token tells the interpreter to ignore the next stream of chars.
 };
 
 int main(void)
 {
 	struct Token token = {'!', ';', '"', '?'}; //Declare token values
 
-	const char *source_path = get_current_directory("code.duel");
+	const char *source_path = get_current_directory("code.duel"); //File path
 
-	//Talk mode variable
-	bool talk_mode = false;
+	bool talk_mode = false;	//Talk mode variable
 
-	//Initiation statement related variable
-	bool initiation_statement_found = false;
+	bool initiation_statement_found = false; //Initiation statement related variable
 
-	//strict mode boolean
-	bool strict_mode = true;
+	bool strict_mode = true; //strict mode boolean
 
 	//Comment mode variables
 	bool comment_mode = false;
 	int comment_count = 0;
 
 
-	char file_buffer[1000]; //Buffer for opening the file
+	char file_buffer[1000];
 	FILE *file = fopen(source_path, "r");
 
-	file_exists(file); //Make sure the file exsists, if not, then throw an error
+	file_exists(file); //Make sure the file exsists
 	check_for_initation_statement(source_path); //Make sure the first char in the file is an initiation statement
 	check_for_end_statement(source_path); //Make sure the last char in the file is an end statement
 
@@ -50,6 +47,7 @@ int main(void)
 	//then we know there is an initiation statement
 	printf("--- The program has successfully been initatied\n\n");
 
+	//Read the file char by char
 	char ch;
 	while((ch = fgetc(file)) != EOF)
 	{
@@ -112,6 +110,7 @@ int main(void)
 		//then look for tokens
 		if(!talk_mode && !comment_mode)
 		{
+			//If strict mode is on an the current char is not a token or string literal, then we throw an error
 			if(strict_mode) {
 				if(ch != '\n' && ch != '\r' && ch != ' ' && ch != '\t' &&
 					ch != token.initiation_statement && ch != token.end_statement &&
