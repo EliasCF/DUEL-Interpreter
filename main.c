@@ -14,15 +14,18 @@ struct Token {
 	char end_statement;        //This token is found as the last char, it signals the end of a program
 	char talk_mode;			   //This token tells the interpeter that the next stream of chars should be printed to the console
 	char comment_mode;		   //This token tells the interpreter to ignore the next stream of chars.
+	char variable_init;        //This token tells the interperter that a variable is being declared, and it should look for a variable name
+	char variable_end;         //This token tells the interpeter that the variable has been declared
 };
 
 int main(void)
 {
-	struct Token token = {'!', ';', '"', '?'}; //Declare token values
+	struct Token token = {'!', ';', '"', '?', '#', ','}; //Declare token values
 
 	const char *source_path = get_current_directory("code.duel"); //File path
 
 	bool talk_mode = false;	//Talk mode variable
+	bool talk_mode_variable = false; //If a variable_init token is found within the talk mode
 
 	bool initiation_statement_found = false; //Initiation statement related variable
 
@@ -31,6 +34,11 @@ int main(void)
 	//Comment mode variables
 	bool comment_mode = false;
 	int comment_count = 0;
+
+	bool variable_mode = false;
+	char variable_name[1]; //Right now the variable name can only be one char long, this should be fixed later
+	char variable_value;
+	bool variable_mode_value = false;
 
 	int count_line = 1; //Counting the amounts of lines in the code
 	int count_char = 0; //Counting the amount of chars in the code
@@ -63,7 +71,32 @@ int main(void)
 			continue;
 		}
 
-		//If talkmode is on
+		//If variable mode value is on, then we store the current char in the variable value char
+		if(variable_mode_value) {
+			variable_value = ch;
+			printf("The varaible '%c' equals '%c'\n\n", variable_name[0], variable_value);
+			variable_mode_value = false;
+			continue;
+		}
+
+		//If variable mode is on
+		if(variable_mode) {
+			if(ch == ' ') {
+				variable_mode = false;
+				variable_mode_value = true;
+				continue;
+			}
+
+			if(ch == token.variable_end) {
+				variable_mode = false;
+				continue;
+			}
+
+			sprintf(variable_name, "%c", ch); //Concat the variable name together char by char
+			printf("Variable '%c' has been declared\n", variable_name[0]);
+		}
+
+		//If talk mode is on
 		if(talk_mode) {
 			//If an end statement is found in talk mode
 			if(ch == token.end_statement) {
@@ -85,6 +118,24 @@ int main(void)
 				talk_mode = false;
 				printf("\n");
 				continue;
+			}
+
+			//If a variable_init token is found within the talk mode, talk mode variable is on
+			if(ch == token.variable_init) {
+				talk_mode_variable = true;
+				continue;
+			}
+
+			if(talk_mode_variable) {
+				if(ch == variable_name[0]) {
+					printf("%c", variable_value);
+					talk_mode_variable = false;
+					continue;
+				}
+
+				char buffer[1000];
+				sprintf(buffer, "There is no variable with the name '%c'", ch);
+				throw_error(buffer);
 			}
 
 			//If none of the above statements werer true, then print out the current char
@@ -118,12 +169,13 @@ int main(void)
 
 		//If the interpreter is not in talk_mode or in comment_mode,
 		//then look for tokens
-		if(!talk_mode && !comment_mode) {
+		if(!talk_mode && !comment_mode && !variable_mode && !variable_mode_value) {
 			//If strict mode is on an the current char is not a token or string literal, then we throw an error
 			if(strict_mode) {
-				if(ch != '\n' && ch != '\r' && ch != ' ' && ch != '\t' &&
+				if (ch != '\n' && ch != '\r' && ch != ' ' && ch != '\t' &&
 					ch != token.initiation_statement && ch != token.end_statement &&
-					ch != token.talk_mode && ch != token.comment_mode) {
+					ch != token.talk_mode && ch != token.comment_mode &&
+					ch != token.variable_init && ch != token.variable_end) {
 						char buffer[1000];
 						sprintf(buffer, "%s'%c' at %d:%d", "An unidetified character was found with the value of: ", ch, count_line, count_char);
 						throw_error(buffer);
@@ -148,6 +200,8 @@ int main(void)
 				}
 
 				getchar();
+
+				fclose(file);
 				exit(0);
 			}
 
@@ -160,10 +214,15 @@ int main(void)
 			if(ch == token.comment_mode) {
 				comment_mode = true;
 			}
+
+			//If a variable initiation token is found we begin variable mode
+			if(ch == token.variable_init) {
+				variable_mode = true;
+			}
 		}
 	}
 
-	fclose(file);
+	fclose(file); //Close file
 
 	return 0;
 }
