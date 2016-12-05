@@ -3,9 +3,6 @@
 //
 //To compile this interpeter in the command line with MinGW, write: g++ main.c -o main.exe
 
-//TODO:
-//Detect which line and character an error comes from
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -35,6 +32,9 @@ int main(void)
 	bool comment_mode = false;
 	int comment_count = 0;
 
+	int count_line = 1; //Counting the amounts of lines in the code
+	int count_char = 0; //Counting the amount of chars in the code
+
 
 	char file_buffer[1000];
 	FILE *file = fopen(source_path, "r");
@@ -51,6 +51,12 @@ int main(void)
 	char ch;
 	while((ch = fgetc(file)) != EOF)
 	{
+		count_char++;
+		if(ch == '\n') {
+			count_line++;
+			count_char = 0;
+		}
+
 		//If the current char is the initiation statement we jump to the next char in the file
 		if(!initiation_statement_found) {
 			initiation_statement_found = true;
@@ -58,17 +64,20 @@ int main(void)
 		}
 
 		//If talkmode is on
-		if(talk_mode)
-		{
+		if(talk_mode) {
 			//If an end statement is found in talk mode
 			if(ch == token.end_statement) {
 				//Either the talkmode is unclosed or there is an end statement in the talk mode
-				throw_error("Error: \nThe interpreter detected an unclosed talk mode");
+				char buffer[1000];
+				sprintf(buffer, "Error: \nThe interpreter detected an unclosed talk mode at %d:%d", count_line, count_char);
+				throw_error(buffer);
 			}
 
 			//If a newline string literal is found, then end talk mode
 			if(ch == '\n') {
-				throw_error("Error: \nThe interpreter detected an unclosed talk mode");
+				char buffer[1000];
+				sprintf(buffer, "Error: \nThe interpreter detected an unclosed talk mode at %d:%d", count_line, count_char);
+				throw_error(buffer);
 			}
 
 			//If a talk mode token is found, then end talk mode
@@ -83,12 +92,13 @@ int main(void)
 		}
 
 		//If comment mode is on
-		if(comment_mode)
-		{
+		if(comment_mode) {
 			//If an end statement is found in comment mode
 			if(ch == token.end_statement) {
 				//Either the comment mode is unclosed or there is an end statement in the comment mode
-				throw_error("Error: \nThe interpreter detected an unclosed comment mode");
+				char buffer[1000];
+				sprintf(buffer, "Error: \nThe interpreter detected an unclosed comment mode at %d:%d", count_line, count_char);
+				throw_error(buffer);
 			}
 
 			//If a newline string literal is found, then end comment mode
@@ -108,22 +118,23 @@ int main(void)
 
 		//If the interpreter is not in talk_mode or in comment_mode,
 		//then look for tokens
-		if(!talk_mode && !comment_mode)
-		{
+		if(!talk_mode && !comment_mode) {
 			//If strict mode is on an the current char is not a token or string literal, then we throw an error
 			if(strict_mode) {
 				if(ch != '\n' && ch != '\r' && ch != ' ' && ch != '\t' &&
 					ch != token.initiation_statement && ch != token.end_statement &&
 					ch != token.talk_mode && ch != token.comment_mode) {
 						char buffer[1000];
-						sprintf(buffer, "%s%c", "An unidetified character was found with the value: ", ch);
+						sprintf(buffer, "%s'%c' at %d:%d", "An unidetified character was found with the value of: ", ch, count_line, count_char);
 						throw_error(buffer);
 				}
 			}
 
 			//If we find an initiation statement we throw an error
 			if(initiation_statement_found && ch == token.initiation_statement) {
-				throw_error("Error: \nThe program has already been initiated with the an initiation statment '!'");
+				char buffer[1000];
+				sprintf(buffer, "Error: \nThe program has already been initiated with the an initiation statment at %d:%d", count_line, count_char);
+				throw_error(buffer);
 			}
 
 			//If we find an end statemnt we print out information and end the program
