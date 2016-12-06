@@ -1,7 +1,7 @@
 //
 //Dumb Useless Esoretic Language - Interpreter
 //
-//To compile this interpeter in the command line with MinGW, write: g++ main.c -o main.exe
+//To compile this interpeter in the command line with MinGW, write: gcc main.c -o main.exe
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,6 +60,9 @@ int main(void)
 	while((ch = fgetc(file)) != EOF)
 	{
 		count_char++;
+
+		//If a the current char is a nextline string literal,
+		//then plus coun_line with one, and set count_char to 0
 		if(ch == '\n') {
 			count_line++;
 			count_char = 0;
@@ -74,7 +77,7 @@ int main(void)
 		//If variable mode value is on, then we store the current char in the variable value char
 		if(variable_mode_value) {
 			variable_value = ch;
-			printf("The varaible '%c' equals '%c'\n\n", variable_name[0], variable_value);
+			printf("--- The variable '%c' has been initialized as '%c'\n\n", variable_name[0], variable_value);
 			variable_mode_value = false;
 			continue;
 		}
@@ -92,8 +95,15 @@ int main(void)
 				continue;
 			}
 
+			if (ch == token.initiation_statement || ch == token.end_statement ||
+				ch == token.talk_mode || ch == token.comment_mode || ch == token.variable_init) {
+					char buffer[1000];
+					sprintf(buffer, "Error: \nYou tried to give a variable the name of a token at %d:%d", count_line, count_char);
+					throw_error(buffer);
+			}
+
 			sprintf(variable_name, "%c", ch); //Concat the variable name together char by char
-			printf("Variable '%c' has been declared\n", variable_name[0]);
+			printf("--- Variable '%c' has been declared\n", variable_name[0]);
 		}
 
 		//If talk mode is on
