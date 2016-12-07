@@ -20,7 +20,15 @@ struct Token {
 
 int main(void)
 {
-	struct Token token = {'!', ';', '"', '?', '#', ','}; //Declare token values
+	 //Declare token values
+	struct Token token = {
+		'!',
+		';',
+		'"',
+		'?',
+		'#',
+		','
+	};
 
 	const char *source_path = get_current_directory("code.duel"); //File path
 
@@ -36,13 +44,12 @@ int main(void)
 	int comment_count = 0;
 
 	bool variable_mode = false;
-	char variable_name[1]; //Right now the variable name can only be one char long, this should be fixed later
-	char variable_value;
+	char variable_name; //Right now the variable name can only be one char long, this should be fixed later
+	char variable_value; //The value of the variable
 	bool variable_mode_value = false;
 
 	int count_line = 1; //Counting the amounts of lines in the code
-	int count_char = 0; //Counting the amount of chars in the code
-
+	int count_char = 0; //Counting the amount of chars in a line
 
 	char file_buffer[1000];
 	FILE *file = fopen(source_path, "r");
@@ -59,7 +66,11 @@ int main(void)
 	char ch;
 	while((ch = fgetc(file)) != EOF)
 	{
-		count_char++;
+		//If the current char is not a tab or white space,
+		//then increase the count of chars in the current line
+		if(ch != '\t' && ch != ' ') {
+			count_char++;
+		}
 
 		//If a the current char is a nextline string literal,
 		//then plus coun_line with one, and set count_char to 0
@@ -77,7 +88,7 @@ int main(void)
 		//If variable mode value is on, then we store the current char in the variable value char
 		if(variable_mode_value) {
 			variable_value = ch;
-			printf("--- The variable '%c' has been initialized as '%c'\n\n", variable_name[0], variable_value);
+			//printf("--- The variable '%c' has been initialized as '%c'\n\n", variable_name[0], variable_value);
 			variable_mode_value = false;
 			continue;
 		}
@@ -95,6 +106,7 @@ int main(void)
 				continue;
 			}
 
+			//Make sure that the variable is not given a token character, if it is, then throw an error
 			if (ch == token.initiation_statement || ch == token.end_statement ||
 				ch == token.talk_mode || ch == token.comment_mode || ch == token.variable_init) {
 					char buffer[1000];
@@ -102,8 +114,8 @@ int main(void)
 					throw_error(buffer);
 			}
 
-			sprintf(variable_name, "%c", ch); //Concat the variable name together char by char
-			printf("--- Variable '%c' has been declared\n", variable_name[0]);
+			variable_name = ch;
+			//printf("--- Variable '%c' has been declared\n", variable_name[0]);
 		}
 
 		//If talk mode is on
@@ -136,13 +148,23 @@ int main(void)
 				continue;
 			}
 
+			//If talk mode variable is on
 			if(talk_mode_variable) {
-				if(ch == variable_name[0]) {
-					printf("%c", variable_value);
-					talk_mode_variable = false;
-					continue;
+				//If the current char is a variable name
+				if(ch == variable_name) {
+					//If the varaible value is not empty / uninitialized
+					if(variable_value != '\0') {
+						printf("%c", variable_value);
+						talk_mode_variable = false;
+						continue;
+					} else {
+						char buffer[1000];
+						sprintf(buffer, "Error: \nYou tried to print a variable value,\nbut the variable was never initiatlized %d:%d", count_line, count_char);
+						throw_error(buffer);
+					}
 				}
 
+				//If none of the above statements were true, then throw an error
 				char buffer[1000];
 				sprintf(buffer, "There is no variable with the name '%c'", ch);
 				throw_error(buffer);
