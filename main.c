@@ -9,13 +9,15 @@
 #include "error.c"
 #include "directory.c"
 
+#define BUFFER_SIZE 1000
+
 struct Token {
-	char initiation_statement; //This token is found as the fist char, it signals the start of a program
-	char end_statement;        //This token is found as the last char, it signals the end of a program
-	char talk_mode;			   //This token tells the interpeter that the next stream of chars should be printed to the console
-	char comment_mode;		   //This token tells the interpreter to ignore the next stream of chars.
-	char variable_init;        //This token tells the interperter that a variable is being declared, and it should look for a variable name
-	char variable_end;         //This token tells the interpeter that the variable has been declared
+	char initiation_statement;  //This token is found as the fist char, it signals the start of a program
+	char end_statement;         //This token is found as the last char, it signals the end of a program
+   	char talk_mode;			    //This token tells the interpeter that the next stream of chars should be printed to the console
+   	char comment_mode;		    //This token tells the interpreter to ignore the next stream of chars.
+   	char variable_init;         //This token tells the interperter that a variable is being declared, and it should look for a variable name
+   	char variable_end;          //This token tells the interpeter that the variable has been declared
 };
 
 int main(void)
@@ -30,8 +32,6 @@ int main(void)
 		','
 	};
 
-	const char *source_path = get_current_directory("code.duel"); //File path
-
 	bool talk_mode = false;	//Talk mode variable
 	bool talk_mode_variable = false; //If a variable_init token is found within the talk mode
 
@@ -43,6 +43,7 @@ int main(void)
 	bool comment_mode = false;
 	int comment_count = 0;
 
+	//Variable mode variables
 	bool variable_mode = false;
 	char variable_name; //Right now the variable name can only be one char long, this should be fixed later
 	char variable_value; //The value of the variable
@@ -51,7 +52,7 @@ int main(void)
 	int count_line = 1; //Counting the amounts of lines in the code
 	int count_char = 0; //Counting the amount of chars in a line
 
-	char file_buffer[1000];
+	const char *source_path = get_current_directory("code.duel"); //File path
 	FILE *file = fopen(source_path, "r");
 
 	file_exists(file); //Make sure the file exsists
@@ -109,7 +110,7 @@ int main(void)
 			//Make sure that the variable is not given a token character, if it is, then throw an error
 			if (ch == token.initiation_statement || ch == token.end_statement ||
 				ch == token.talk_mode || ch == token.comment_mode || ch == token.variable_init) {
-					char buffer[1000];
+					char buffer[BUFFER_SIZE];
 					sprintf(buffer, "Error: \nYou tried to give a variable the name of a token at %d:%d", count_line, count_char);
 					throw_error(buffer);
 			}
@@ -123,14 +124,14 @@ int main(void)
 			//If an end statement is found in talk mode
 			if(ch == token.end_statement) {
 				//Either the talkmode is unclosed or there is an end statement in the talk mode
-				char buffer[1000];
+				char buffer[BUFFER_SIZE];
 				sprintf(buffer, "Error: \nThe interpreter detected an unclosed talk mode at %d:%d", count_line, count_char);
 				throw_error(buffer);
 			}
 
 			//If a newline string literal is found, then end talk mode
 			if(ch == '\n') {
-				char buffer[1000];
+				char buffer[BUFFER_SIZE];
 				sprintf(buffer, "Error: \nThe interpreter detected an unclosed talk mode at %d:%d", count_line, count_char);
 				throw_error(buffer);
 			}
@@ -158,14 +159,14 @@ int main(void)
 						talk_mode_variable = false;
 						continue;
 					} else {
-						char buffer[1000];
+						char buffer[BUFFER_SIZE];
 						sprintf(buffer, "Error: \nYou tried to print a variable value,\nbut the variable was never initiatlized %d:%d", count_line, count_char);
 						throw_error(buffer);
 					}
 				}
 
 				//If none of the above statements were true, then throw an error
-				char buffer[1000];
+				char buffer[BUFFER_SIZE];
 				sprintf(buffer, "There is no variable with the name '%c'", ch);
 				throw_error(buffer);
 			}
@@ -179,7 +180,7 @@ int main(void)
 			//If an end statement is found in comment mode
 			if(ch == token.end_statement) {
 				//Either the comment mode is unclosed or there is an end statement in the comment mode
-				char buffer[1000];
+				char buffer[BUFFER_SIZE];
 				sprintf(buffer, "Error: \nThe interpreter detected an unclosed comment mode at %d:%d", count_line, count_char);
 				throw_error(buffer);
 			}
@@ -208,7 +209,7 @@ int main(void)
 					ch != token.initiation_statement && ch != token.end_statement &&
 					ch != token.talk_mode && ch != token.comment_mode &&
 					ch != token.variable_init && ch != token.variable_end) {
-						char buffer[1000];
+						char buffer[BUFFER_SIZE];
 						sprintf(buffer, "%s'%c' at %d:%d", "An unidetified character was found with the value of: ", ch, count_line, count_char);
 						throw_error(buffer);
 				}
@@ -216,7 +217,7 @@ int main(void)
 
 			//If we find an initiation statement we throw an error
 			if(initiation_statement_found && ch == token.initiation_statement) {
-				char buffer[1000];
+				char buffer[BUFFER_SIZE];
 				sprintf(buffer, "Error: \nThe program has already been initiated with the an initiation statment at %d:%d", count_line, count_char);
 				throw_error(buffer);
 			}
