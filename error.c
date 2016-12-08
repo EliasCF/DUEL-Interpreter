@@ -36,7 +36,7 @@ void check_for_end_statement(const char *path)
 	}
 
 	if(contents[strlen(contents) - 1] != ';') {
-		throw_error("Error: \nThe interpreter could not find an end statement ';'");
+		throw_error("Error: \nThe interpreter could not find an end statement \";\"");
 	}
 }
 
@@ -44,15 +44,13 @@ void check_for_end_statement(const char *path)
 //If not, then throw an error
 void check_for_initation_statement(const char *path)
 {
-	char *contents;
-
 	char file_buffer[1000];
 	FILE *file = fopen(path, "r");
 
 	char ch;
 	while((ch = fgetc(file)) != EOF) {
 		if(ch != '!') {
-			throw_error("Error: \nThe interpreter could not find an initation statement: '!'");
+			throw_error("Error: \nThe interpreter could not find an initation statement: \"!\"");
 		} else {
 			break;
 		}

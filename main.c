@@ -73,7 +73,7 @@ int main(void)
 			count_char++;
 		}
 
-		//If a the current char is a nextline string literal,
+		//If the current char is a nextline escape sequence,
 		//then plus coun_line with one, and set count_char to 0
 		if(ch == '\n') {
 			count_line++;
@@ -125,14 +125,14 @@ int main(void)
 			if(ch == token.end_statement) {
 				//Either the talkmode is unclosed or there is an end statement in the talk mode
 				char buffer[BUFFER_SIZE];
-				sprintf(buffer, "Error: \nThe interpreter detected an unclosed talk mode at %d:%d", count_line, count_char);
+				sprintf(buffer, "Error: \nThe interpreter detected an unclosed talk mode \"\"\" at %d:%d", count_line, count_char);
 				throw_error(buffer);
 			}
 
-			//If a newline string literal is found, then end talk mode
+			//If a newline escape sequence is found, then end talk mode
 			if(ch == '\n') {
 				char buffer[BUFFER_SIZE];
-				sprintf(buffer, "Error: \nThe interpreter detected an unclosed talk mode at %d:%d", count_line, count_char);
+				sprintf(buffer, "Error: \nThe interpreter detected an unclosed talk mode \"\"\" at %d:%d", count_line, count_char);
 				throw_error(buffer);
 			}
 
@@ -181,11 +181,11 @@ int main(void)
 			if(ch == token.end_statement) {
 				//Either the comment mode is unclosed or there is an end statement in the comment mode
 				char buffer[BUFFER_SIZE];
-				sprintf(buffer, "Error: \nThe interpreter detected an unclosed comment mode at %d:%d", count_line, count_char);
+				sprintf(buffer, "Error: \nThe interpreter detected an unclosed comment mode \"?\" at %d:%d", count_line, count_char);
 				throw_error(buffer);
 			}
 
-			//If a newline string literal is found, then end comment mode
+			//If a newline escape sequence is found, then end comment mode
 			if(ch == '\n') {
 				comment_mode = false;
 				comment_count++;
@@ -203,7 +203,7 @@ int main(void)
 		//If the interpreter is not in talk_mode or in comment_mode,
 		//then look for tokens
 		if(!talk_mode && !comment_mode && !variable_mode && !variable_mode_value) {
-			//If strict mode is on an the current char is not a token or string literal, then we throw an error
+			//If strict mode is on an the current char is not a token or escape sequence, then we throw an error
 			if(strict_mode) {
 				if (ch != '\n' && ch != '\r' && ch != ' ' && ch != '\t' &&
 					ch != token.initiation_statement && ch != token.end_statement &&
@@ -218,7 +218,7 @@ int main(void)
 			//If we find an initiation statement we throw an error
 			if(initiation_statement_found && ch == token.initiation_statement) {
 				char buffer[BUFFER_SIZE];
-				sprintf(buffer, "Error: \nThe program has already been initiated with the an initiation statment at %d:%d", count_line, count_char);
+				sprintf(buffer, "Error: \nThe program has already been initiated with the an initiation statment \"!\" at %d:%d", count_line, count_char);
 				throw_error(buffer);
 			}
 
