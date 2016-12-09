@@ -48,6 +48,7 @@ int main(void)
 	char variable_name; //Right now the variable name can only be one char long, this should be fixed later
 	char variable_value; //The value of the variable
 	bool variable_mode_value = false;
+	bool variable_mode_find_end = false;
 
 	int count_line = 1; //Counting the amounts of lines in the code
 	int count_char = 0; //Counting the amount of chars in a line
@@ -91,6 +92,7 @@ int main(void)
 			variable_value = ch;
 			//printf("--- The variable '%c' has been initialized as '%c'\n\n", variable_name[0], variable_value);
 			variable_mode_value = false;
+			variable_mode_find_end = true;
 			continue;
 		}
 
@@ -117,6 +119,19 @@ int main(void)
 
 			variable_name = ch;
 			//printf("--- Variable '%c' has been declared\n", variable_name[0]);
+		}
+
+		if(variable_mode_find_end) {
+			//If there is no variable end token, then throw an error
+			if(ch != token.variable_end) {
+				char buffer[BUFFER_SIZE];
+				sprintf(buffer, "Error: \nYou tried initialize a variable\nBut interpreter never found an end token \",\" at %d:%d", count_line, count_char);
+				throw_error(buffer);
+			}
+
+			//If there is a variable end token, then we go to the next character
+			variable_mode_find_end = false;
+			continue;
 		}
 
 		//If talk mode is on
