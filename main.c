@@ -46,7 +46,7 @@ int main(void)
 	//Variable mode variables
 	bool variable_mode = false;
 	char variable_name; //Right now the variable name can only be one char long, this should be fixed later
-	char variable_value; //The value of the variable
+	char variable_value[] = ""; //The value of the variable
 	bool variable_mode_value = false;
 	bool variable_mode_find_end = false;
 
@@ -89,10 +89,13 @@ int main(void)
 
 		//If variable mode value is on, then we store the current char in the variable value char
 		if(variable_mode_value) {
-			variable_value = ch;
-			//printf("--- The variable '%c' has been initialized as '%c'\n\n", variable_name[0], variable_value);
+			if (ch != token.variable_end) {
+				strncat(variable_value, &ch, 1);
+				continue;
+			} 
+
 			variable_mode_value = false;
-			variable_mode_find_end = true;
+			//If there is a variable end token, then we go to the next character
 			continue;
 		}
 
@@ -119,19 +122,6 @@ int main(void)
 
 			variable_name = ch;
 			//printf("--- Variable '%c' has been declared\n", variable_name[0]);
-		}
-
-		if(variable_mode_find_end) {
-			//If there is no variable end token, then throw an error
-			if(ch != token.variable_end) {
-				char buffer[BUFFER_SIZE];
-				sprintf(buffer, "Error: \nYou tried initialize a variable\nBut interpreter never found an end token \",\" at %d:%d", count_line, count_char);
-				throw_error(buffer);
-			}
-
-			//If there is a variable end token, then we go to the next character
-			variable_mode_find_end = false;
-			continue;
 		}
 
 		//If talk mode is on
@@ -169,8 +159,8 @@ int main(void)
 				//If the current char is a variable name
 				if(ch == variable_name) {
 					//If the varaible value is not empty / uninitialized
-					if(variable_value != '\0') {
-						printf("%c", variable_value);
+					if(variable_value != "") {
+						printf("%s", variable_value);
 						talk_mode_variable = false;
 						continue;
 					} else {

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <windows.h>
+//#include <windows.h>
 
 void throw_error(const char *message);
 void check_for_end_statement(const char *path);
@@ -11,9 +11,9 @@ void file_exists(FILE *file);
 //print out an error, and then exit the program
 void throw_error(const char *message)
 {
-	system("cls");
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, FOREGROUND_RED); //Set foreground color as red
+	//system("clear");
+	//HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	//SetConsoleTextAttribute(hConsole, FOREGROUND_RED); //Set foreground color as red
 
 	printf("%s\n", message);
 	printf("\nPress any key to continue...");
